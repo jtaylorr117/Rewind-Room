@@ -43,6 +43,7 @@ struct OldiesSliderView: View {
             // Skip Button
             Button {
                 if viewModel.isPlaying {
+                    
                     viewModel.pause()
                 }
 
@@ -50,7 +51,7 @@ struct OldiesSliderView: View {
 
                 currItem = Int.random(in: 0..<viewModel.songsArray.count-1)
                 viewModel.setCurrentSong(song: viewModel.songsArray[currItem])
-
+                viewModel.setVolumeLevel(volume: viewModel.songVolumeLevel)
                 if !viewModel.isPlaying {
                     viewModel.play()
                     isSpinning = false

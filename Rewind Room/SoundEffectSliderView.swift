@@ -13,7 +13,7 @@ struct SoundEffectSliderView: View {
     
     let symbol: String
     let label: String
-
+    
     var body: some View {
         HStack {
             Button {
@@ -29,7 +29,7 @@ struct SoundEffectSliderView: View {
 
             Text(label)
                 .frame(width: 60, alignment: .leading)
-
+            
             Slider(value: $viewModel.songVolumeLevel, in: 0...100) { isMoving in
                 viewModel.setVolumeLevel(volume: viewModel.songVolumeLevel)
             }

@@ -11,6 +11,7 @@ struct ContentView: View {
     @StateObject var oldiesMusicViewModel = AudioPlayerViewModel()
     @StateObject var rainSoundsViewModel = AudioPlayerViewModel()
     @StateObject var staticSoundsViewModel = AudioPlayerViewModel()
+    @StateObject var fireSoundsViewModel = AudioPlayerViewModel()
     
     
     @State private var recordIsSpinning = false
@@ -61,6 +62,7 @@ struct ContentView: View {
                     
                     SoundEffectSliderView(viewModel: staticSoundsViewModel, symbol: "arrow.clockwise", label: "Static")
                     
+                    SoundEffectSliderView(viewModel: fireSoundsViewModel, symbol: "arrow.clockwise", label: "Fire")
                     
 
                 }
@@ -71,12 +73,19 @@ struct ContentView: View {
             .task {
                 await oldiesMusicViewModel.fetchSongs()
                 oldiesMusicViewModel.setCurrentSong(song: oldiesMusicViewModel.songsArray[currItem])
+                oldiesMusicViewModel.setVolumeLevel(volume: 70)
                 
                 await rainSoundsViewModel.fetchSoundEffects()
                 rainSoundsViewModel.setSoundEffect(soundEffectId: 1)
                 
                 await staticSoundsViewModel.fetchSoundEffects()
                 staticSoundsViewModel.setSoundEffect(soundEffectId: 2) // Static
+                staticSoundsViewModel.setVolumeLevel(volume: 100)
+                
+                await fireSoundsViewModel.fetchSoundEffects()
+                fireSoundsViewModel.setSoundEffect(soundEffectId: 3) // Fire
+                oldiesMusicViewModel.setVolumeLevel(volume: 70)
+                
             }
         }
     }
