@@ -22,6 +22,14 @@ class AudioPlayerViewModel: ObservableObject {
         player.play()
         isPlaying = true
     }
+    
+    func restart() {
+        guard let player = audioPlayer else { return }
+        player.seek(to: .zero)
+        player.play()
+        isPlaying = true
+    }
+    
     func pause() {
         guard let player = audioPlayer else { return }
         player.pause()

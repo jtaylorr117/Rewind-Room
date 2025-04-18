@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject var audioPlayerViewModel = AudioPlayerViewModel()
-    @StateObject var audioPlayerViewModel2 = AudioPlayerViewModel()
+    @StateObject var oldiesMusicViewModel = AudioPlayerViewModel()
+    @StateObject var rainSoundsViewModel = AudioPlayerViewModel()
+    @StateObject var staticSoundsViewModel = AudioPlayerViewModel()
     
     
     @State private var recordIsSpinning = false
@@ -18,10 +19,10 @@ struct ContentView: View {
     var body: some View {
         NavigationStack{
             VStack{
-                if(audioPlayerViewModel.songsArray.isEmpty){
+                if(oldiesMusicViewModel.songsArray.isEmpty){
                     
                 }else{
-                    AsyncImage(url: URL(string: audioPlayerViewModel.songsArray[currItem].art_url)) { image in
+                    AsyncImage(url: URL(string: oldiesMusicViewModel.songsArray[currItem].art_url)) { image in
                         image.resizable()
                     } placeholder: {
                         ProgressView()
@@ -48,85 +49,19 @@ struct ContentView: View {
                 
                 
                 VStack{
-                    HStack{
-                        
-                        //Play Button
-                        Button(action:
-                        {
-                            if audioPlayerViewModel.isPlaying {
-                                    audioPlayerViewModel.pause()
-                                    recordIsSpinning = false
-                                } else {
-                                    audioPlayerViewModel.play()
-                                    recordIsSpinning = false // reset position to 0 before spinning again
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                                        recordIsSpinning = true
-                                    }
-                                }
-                        }) {
-                            Image(systemName: audioPlayerViewModel.isPlaying ? "pause.fill" : "play.fill")
-                        }
-                        .padding()
-                        
-                        Text("Oldies")
-                            .frame(width: 60, alignment: .leading)
-                        
-                        
-                        //Oldies Sound Slider
-                        Slider(value: $audioPlayerViewModel.songVolumeLevel, in: 0...100) { isMoving in
-                            audioPlayerViewModel.setVolumeLevel(volume: audioPlayerViewModel.songVolumeLevel)
-                        }
-                        
-                        //Skip Button
-                        Button {
-                            if(audioPlayerViewModel.isPlaying){
-                                audioPlayerViewModel.pause()
-                            }
-                            
-                            recordIsSpinning = false // stop rotation before skipping
-                            
-                            currItem = Int.random(in: 0..<audioPlayerViewModel.songsArray.count-1)
-                            audioPlayerViewModel.setCurrentSong(song: audioPlayerViewModel.songsArray[currItem])
-                            
-                            if(!audioPlayerViewModel.isPlaying){
-                                audioPlayerViewModel.play()
-                                recordIsSpinning = false // reset position to 0 before spinning again
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                                    recordIsSpinning = true
-                                }
-                                
-                            }
-                        } label: {
-                            //Text("Skip Song")
-                            Image(systemName: "forward.fill")
-                        }
-                        .padding()
-                    }
-                    HStack{
-                        //Play Button
-                        Button(action: {
-                            if(audioPlayerViewModel2.isPlaying){
-                                audioPlayerViewModel2.pause()
-                            }else{
-                                audioPlayerViewModel2.play()
-                            }
-                        }) {
-                            Image(systemName: audioPlayerViewModel2.isPlaying ? "pause.fill" : "play.fill")
-                        }
-                        .padding()
-                        
-                        Text("Rain")
-                            .frame(width: 60, alignment: .leading)
-                        
-
-                        
-                        Slider(value: $audioPlayerViewModel2.songVolumeLevel, in: 0...100) { isMoving in
-                            audioPlayerViewModel2.setVolumeLevel(volume: audioPlayerViewModel2.songVolumeLevel)
-                        }.padding(.trailing, 20)
-                        
-                        
-                        
-                    }
+                    OldiesSliderView(
+                        viewModel: oldiesMusicViewModel,
+                        isSpinning: $recordIsSpinning,
+                        currItem: $currItem
+                    )
+                    
+                    SoundEffectSliderView(viewModel: rainSoundsViewModel,
+                    symbol: "arrow.clockwise",
+                    label: "Rain")
+                    
+                    SoundEffectSliderView(viewModel: staticSoundsViewModel, symbol: "arrow.clockwise", label: "Static")
+                    
+                    
 
                 }
             
@@ -134,11 +69,14 @@ struct ContentView: View {
             }
             .navigationTitle("Rewind Room")
             .task {
-                await audioPlayerViewModel.fetchSongs()
-                audioPlayerViewModel.setCurrentSong(song: audioPlayerViewModel.songsArray[currItem])
+                await oldiesMusicViewModel.fetchSongs()
+                oldiesMusicViewModel.setCurrentSong(song: oldiesMusicViewModel.songsArray[currItem])
                 
-                await audioPlayerViewModel2.fetchSoundEffects()
-                audioPlayerViewModel2.setSoundEffect(soundEffectId: 1)
+                await rainSoundsViewModel.fetchSoundEffects()
+                rainSoundsViewModel.setSoundEffect(soundEffectId: 1)
+                
+                await staticSoundsViewModel.fetchSoundEffects()
+                staticSoundsViewModel.setSoundEffect(soundEffectId: 2) // Static
             }
         }
     }
