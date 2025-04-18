@@ -10,6 +10,9 @@ import SwiftUI
 struct ContentView: View {
     @StateObject var audioPlayerViewModel = AudioPlayerViewModel()
     @StateObject var audioPlayerViewModel2 = AudioPlayerViewModel()
+    
+    
+    @State private var recordIsSpinning = false
     @State var currItem: Int = 0
     
     var body: some View {
@@ -24,13 +27,19 @@ struct ContentView: View {
                         ProgressView()
                     }
                     .aspectRatio(contentMode: .fit)
-                    .clipShape(.rect(cornerRadius: 10))
+                    .clipShape(Circle())
                     .scaledToFit()
                     .padding([.leading, .trailing], 100)
-                    .animation(.bouncy, value: audioPlayerViewModel.isPlaying)
+                    .rotationEffect(Angle.degrees(recordIsSpinning ? 360 : 0))
+                    .animation(recordIsSpinning
+                        ? Animation.linear(duration: 4.0).repeatForever(autoreverses: false)
+                        : .default,
+                        value: recordIsSpinning
+                    )
                     
-//                    Text(audioPlayerViewModel.songsArray[currItem].title)
-//                        .font(.title3)
+                    
+                    //                    Text(audioPlayerViewModel.songsArray[currItem].title)
+                    //                        .font(.title3)
                 }
                 
                 
@@ -42,19 +51,26 @@ struct ContentView: View {
                     HStack{
                         
                         //Play Button
-                        Button(action: {
-                            if(audioPlayerViewModel.isPlaying){
-                                audioPlayerViewModel.pause()
-                            }else{
-                                audioPlayerViewModel.play()
-                            }
+                        Button(action:
+                        {
+                            if audioPlayerViewModel.isPlaying {
+                                    audioPlayerViewModel.pause()
+                                    recordIsSpinning = false
+                                } else {
+                                    audioPlayerViewModel.play()
+                                    recordIsSpinning = false // reset position to 0 before spinning again
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                                        recordIsSpinning = true
+                                    }
+                                }
                         }) {
                             Image(systemName: audioPlayerViewModel.isPlaying ? "pause.fill" : "play.fill")
-                                .font(.largeTitle)
                         }
                         .padding()
                         
                         Text("Oldies")
+                            .frame(width: 60, alignment: .leading)
+                        
                         
                         //Oldies Sound Slider
                         Slider(value: $audioPlayerViewModel.songVolumeLevel, in: 0...100) { isMoving in
@@ -66,14 +82,23 @@ struct ContentView: View {
                             if(audioPlayerViewModel.isPlaying){
                                 audioPlayerViewModel.pause()
                             }
+                            
+                            recordIsSpinning = false // stop rotation before skipping
+                            
                             currItem = Int.random(in: 0..<audioPlayerViewModel.songsArray.count-1)
                             audioPlayerViewModel.setCurrentSong(song: audioPlayerViewModel.songsArray[currItem])
                             
                             if(!audioPlayerViewModel.isPlaying){
                                 audioPlayerViewModel.play()
+                                recordIsSpinning = false // reset position to 0 before spinning again
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                                    recordIsSpinning = true
+                                }
+                                
                             }
                         } label: {
-                            Text("Skip Song")
+                            //Text("Skip Song")
+                            Image(systemName: "forward.fill")
                         }
                         .padding()
                     }
@@ -87,14 +112,18 @@ struct ContentView: View {
                             }
                         }) {
                             Image(systemName: audioPlayerViewModel2.isPlaying ? "pause.fill" : "play.fill")
-                                .font(.largeTitle)
                         }
                         .padding()
                         
                         Text("Rain")
+                            .frame(width: 60, alignment: .leading)
+                        
+
+                        
                         Slider(value: $audioPlayerViewModel2.songVolumeLevel, in: 0...100) { isMoving in
                             audioPlayerViewModel2.setVolumeLevel(volume: audioPlayerViewModel2.songVolumeLevel)
-                        }
+                        }.padding(.trailing, 20)
+                        
                         
                         
                     }
@@ -109,7 +138,7 @@ struct ContentView: View {
                 audioPlayerViewModel.setCurrentSong(song: audioPlayerViewModel.songsArray[currItem])
                 
                 await audioPlayerViewModel2.fetchSoundEffects()
-                audioPlayerViewModel2.setSoundEffect(sound: audioPlayerViewModel2.soundEffectArray[0])
+                audioPlayerViewModel2.setSoundEffect(soundEffectId: 1)
             }
         }
     }

@@ -33,9 +33,16 @@ class AudioPlayerViewModel: ObservableObject {
         audioPlayer = AVPlayer(url: url)
     }
     
-    func setSoundEffect(sound: SoundEffect){
-        let url = URL(string: sound.audioFile)!
-        audioPlayer = AVPlayer(url: url)
+    func setSoundEffect(soundEffectId: Int){
+        
+        for sound in soundEffectArray{
+            if (sound.id == soundEffectId){
+                let foundSound = sound
+                let url = URL(string: foundSound.audioFile)!
+                audioPlayer = AVPlayer(url: url)
+                break
+            }
+        }
     }
     
     func setVolumeLevel(volume: Float){
