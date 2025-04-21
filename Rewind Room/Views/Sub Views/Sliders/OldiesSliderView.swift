@@ -36,9 +36,10 @@ struct OldiesSliderView: View {
                 .frame(width: 60, alignment: .leading)
 
             // Volume Slider
-            Slider(value: $viewModel.songVolumeLevel, in: 0...100) { isMoving in
+            Slider(value: $viewModel.songVolumeLevel, in: 0...1) { isMoving in
                 viewModel.setVolumeLevel(volume: viewModel.songVolumeLevel)
             }
+            .scaleEffect(x: 0.8, y: 0.8)
 
             // Skip Button
             Button {

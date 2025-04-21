@@ -41,6 +41,8 @@ class AudioPlayerViewModel: ObservableObject {
         audioPlayer = AVPlayer(url: url)
     }
     
+    
+    // sets the sound effect to the one in the database matching the id provided
     func setSoundEffect(soundEffectId: Int){
         
         for sound in soundEffectArray{

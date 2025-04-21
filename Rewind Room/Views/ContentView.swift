@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MediaPlayer
 
 struct ContentView: View {
     @StateObject var oldiesMusicViewModel = AudioPlayerViewModel()
@@ -50,6 +51,8 @@ struct ContentView: View {
                 
                 
                 VStack{
+                    
+                    
                     OldiesSliderView(
                         viewModel: oldiesMusicViewModel,
                         isSpinning: $recordIsSpinning,
@@ -73,18 +76,18 @@ struct ContentView: View {
             .task {
                 await oldiesMusicViewModel.fetchSongs()
                 oldiesMusicViewModel.setCurrentSong(song: oldiesMusicViewModel.songsArray[currItem])
-                oldiesMusicViewModel.setVolumeLevel(volume: 70)
+                oldiesMusicViewModel.setVolumeLevel(volume: 0.5)
                 
                 await rainSoundsViewModel.fetchSoundEffects()
                 rainSoundsViewModel.setSoundEffect(soundEffectId: 1)
                 
                 await staticSoundsViewModel.fetchSoundEffects()
                 staticSoundsViewModel.setSoundEffect(soundEffectId: 2) // Static
-                staticSoundsViewModel.setVolumeLevel(volume: 100)
+                staticSoundsViewModel.setVolumeLevel(volume: 0.5)
                 
                 await fireSoundsViewModel.fetchSoundEffects()
                 fireSoundsViewModel.setSoundEffect(soundEffectId: 3) // Fire
-                oldiesMusicViewModel.setVolumeLevel(volume: 70)
+                oldiesMusicViewModel.setVolumeLevel(volume: 0.5)
                 
             }
         }
