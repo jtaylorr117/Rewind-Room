@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-
 struct SoundEffectSliderView: View {
     @ObservedObject var viewModel: AudioPlayerViewModel
     
@@ -15,7 +14,8 @@ struct SoundEffectSliderView: View {
     let label: String
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
+            // Play/Pause Button
             Button {
                 if viewModel.isPlaying {
                     viewModel.pause()
@@ -23,26 +23,86 @@ struct SoundEffectSliderView: View {
                     viewModel.play()
                 }
             } label: {
-                Image(systemName: viewModel.isPlaying ? "pause.fill" : "play.fill")
+                ZStack {
+                    Circle()
+                        .fill(viewModel.isPlaying ? Color.blue.opacity(0.3) : Color.gray.opacity(0.3))
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: viewModel.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 14))
+                        .foregroundColor(.white)
+                }
             }
-            .padding()
+            .buttonStyle(PlainButtonStyle())
 
-            Text(label)
-                .frame(width: 60, alignment: .leading)
-            
-            Slider(value: $viewModel.songVolumeLevel, in: 0...1) { isMoving in
+            // Track label with appropriate icon
+            HStack() {
+                Image(systemName: getIconForLabel(label))
+                    .font(.system(size: 12))
+                    .foregroundColor(.gray)
                 
-                viewModel.setVolumeLevel(volume: viewModel.songVolumeLevel)
+                Spacer()
+                
+                Text(label)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.white)
             }
-            .scaleEffect(x: 0.8, y: 0.8)
+            .frame(width: 70, alignment: .leading)
             
-            Button {
-                viewModel.restart()
-            } label: {
-                Image(systemName: symbol)
+            // Volume Slider with custom style
+            SliderView(value: $viewModel.songVolumeLevel, range: 0...1) { _ in
+                viewModel.setVolumeLevel(volume: viewModel.songVolumeLevel)
+                
+                // Auto-play when volume is increased from zero
+                if viewModel.songVolumeLevel > 0 && !viewModel.isPlaying {
+                    viewModel.play()
+                }
+                
+                // Auto-pause when volume is set to zero
+                if viewModel.songVolumeLevel == 0 && viewModel.isPlaying {
+                    viewModel.pause()
+                }
             }
-            .frame(width: 20, alignment: .leading)
-            .padding()
+            .padding(.top, 12)
+
+            // Restart Button
+            Button {
+                if viewModel.songVolumeLevel > 0 {
+                    viewModel.restart()
+                    if !viewModel.isPlaying {
+                        viewModel.play()
+                    }
+                }
+            } label: {
+                ZStack {
+                    Circle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 36, height: 36)
+                    
+                    Image(systemName: symbol)
+                        .font(.system(size: 14))
+                        .foregroundColor(.white)
+                }
+            }
+            .buttonStyle(PlainButtonStyle())
+            .disabled(viewModel.songVolumeLevel == 0)
+            .opacity(viewModel.songVolumeLevel > 0 ? 1.0 : 0.5)
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+    }
+    
+    // Helper function to get appropriate icon for each sound type
+    private func getIconForLabel(_ label: String) -> String {
+        switch label {
+        case "Rain":
+            return "cloud.rain"
+        case "Static":
+            return "radio"
+        case "Fire":
+            return "flame"
+        default:
+            return "speaker.wave.2"
         }
     }
 }
