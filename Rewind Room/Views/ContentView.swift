@@ -15,6 +15,8 @@ struct ContentView: View {
     @StateObject var fireSoundsViewModel = AudioPlayerViewModel()
     
     
+    
+    
     @State private var recordIsSpinning = false
     @State private var showingInfo = false
     @State private var showingSleepTimer = false
@@ -28,6 +30,11 @@ struct ContentView: View {
     @State var rainyNight = false
     @State var vintageRadio = false
     @State var quietNight = false
+    
+    
+    //sleep timer options
+    @State var timerOptions = [0.1, 0.5, 1, 5, 10, 15, 30, 60]
+    
     
     var body: some View {
         NavigationStack{
@@ -272,27 +279,27 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingInfo) {
-                infoView()
+                InfoView(viewModel: oldiesMusicViewModel, isPresented: $showingInfo, currItem: $currItem)
             }
             .sheet(isPresented: $showingSleepTimer) {
-                SleepTimerView(viewModel: oldiesMusicViewModel, isPresented: $showingSleepTimer)
+                sleepTimerView()
             }
             .task {
                 await oldiesMusicViewModel.fetchSongs()
                 oldiesMusicViewModel.setCurrentSong(song: oldiesMusicViewModel.songsArray[currItem])
-                oldiesMusicViewModel.setVolumeLevel(volume: 0.5)
+                oldiesMusicViewModel.setVolumeLevel(volume: 0)
                 
                 await rainSoundsViewModel.fetchSoundEffects()
                 rainSoundsViewModel.setSoundEffect(soundEffectId: 1)
-                rainSoundsViewModel.setVolumeLevel(volume: 0.5)
+                rainSoundsViewModel.setVolumeLevel(volume: 0)
                 
                 await staticSoundsViewModel.fetchSoundEffects()
                 staticSoundsViewModel.setSoundEffect(soundEffectId: 2) // Static
-                staticSoundsViewModel.setVolumeLevel(volume: 0.5)
+                staticSoundsViewModel.setVolumeLevel(volume: 0)
                 
                 await fireSoundsViewModel.fetchSoundEffects()
                 fireSoundsViewModel.setSoundEffect(soundEffectId: 3) // Fire
-                fireSoundsViewModel.setVolumeLevel(volume: 0.5)
+                fireSoundsViewModel.setVolumeLevel(volume: 0)
             }
         }
     }
@@ -340,54 +347,78 @@ struct ContentView: View {
             fireSoundsViewModel.pause()
         }
     }
-    private func infoView() -> some View {
+    
+    private func sleepTimerView() -> some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("About Rewind Room")
-                        .font(.title)
-                        .bold()
-                    
-                    Text("Rewind Room is a unique audio experience that combines classic oldies music with ambient soundscapes to create the perfect nostalgic atmosphere.")
-                    
-                    Text("Inspired by \"i miss my cafe\"  and \"oldies playing in another room and its raining\" ")
-                    
-                    Text("How to Use:")
-                        .font(.headline)
-                    
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("• Tap play/pause to control each sound individually")
-                        Text("• Use the sliders to adjust volume levels")
-                        //Text("• Try the preset buttons for quick atmosphere changes")
-                        Text("• Tap the forward button on the music player to change songs")
-                        Text("• Tap the restart button on ambient sounds to restart the loop, by default the sounds will auto-loop")
-                    }
-                    
-                    if !oldiesMusicViewModel.songsArray.isEmpty {
-                        Text("Current Song:")
+            VStack(spacing: 20) {
+                if oldiesMusicViewModel.sleepTimerActive || rainSoundsViewModel.sleepTimerActive{
+                    // Active timer display
+                    VStack(spacing: 15) {
+                        Text("Sleep timer active")
                             .font(.headline)
                         
-                        VStack(alignment: .leading) {
-                            Text("\(oldiesMusicViewModel.songsArray[currItem].title)")
-                                .bold()
-                            
-                            if let date = oldiesMusicViewModel.songsArray[currItem].date {
-                                Text("Released: \(date)")
-                            }
-                            
-                            if let isPublicDomain = oldiesMusicViewModel.songsArray[currItem].public_domain, isPublicDomain {
-                                Text("Public Domain Music")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
+                        Text(oldiesMusicViewModel.formattedRemainingTime())
+                            .font(.system(size: 48, weight: .medium, design: .monospaced))
+                            .foregroundColor(.blue)
+                        
+                        Button(action: {
+                            oldiesMusicViewModel.cancelSleepTimer()
+                        }) {
+                            Text("Cancel Timer")
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 24)
+                                .padding(.vertical, 12)
+                                .background(Color.red)
+                                .cornerRadius(8)
+                        }
+                    }
+                    .padding()
+                } else {
+                    // Timer selection
+                    Text("Stop playing music after:")
+                        .font(.headline)
+                        .padding(.top)
+                    
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 15) {
+                        ForEach(timerOptions, id: \.self) { minutes in
+                            Button(action: {
+                                oldiesMusicViewModel.startSleepTimer(minutes: Double(minutes))
+                            }) {
+                                VStack {
+                                    if(minutes < 1){
+                                        
+                                        Text("\(Int(minutes*60))")
+                                            .font(.title2)
+                                            .bold()
+                                        Text("sec")
+                                            .font(.caption)
+                                    }else{
+                                        Text("\(Int(minutes))")
+                                            .font(.title2)
+                                            .bold()
+                                        Text("min")
+                                            .font(.caption)
+                                    }
+                                }
+                                .foregroundColor(.white)
+                                .frame(width: 80, height: 80)
+                                .background(Color.blue)
+                                .cornerRadius(15)
                             }
                         }
                     }
+                    .padding()
+                    
+                    Text("The app will automatically stop playback after the selected time.")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding()
                 }
-                .padding()
             }
-            .navigationBarTitle("Info", displayMode: .inline)
+            .navigationBarTitle("Sleep Timer", displayMode: .inline)
             .navigationBarItems(trailing: Button("Done") {
-                showingInfo = false
+                showingSleepTimer = false
             })
         }
     }
