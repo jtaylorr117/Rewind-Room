@@ -19,6 +19,12 @@ class AudioPlayerViewModel: ObservableObject {
     
     @Published var shouldLoop: Bool = true
     private var playbackObserver: Any?
+    
+    // Timer properties
+    @Published var sleepTimerActive: Bool = false
+    @Published var sleepTimerRemaining: TimeInterval = 0
+    private var sleepTimer: Timer?
+    private var sleepTimerEndDate: Date?
 
     //deallocates the observeer when the viewmodel is no longer needed
     deinit {
@@ -94,7 +100,50 @@ class AudioPlayerViewModel: ObservableObject {
         }
     }
 
-    
+    // Set and start sleep timer
+    func startSleepTimer(minutes: TimeInterval) {
+        // Cancel any existing timer
+        cancelSleepTimer()
+        
+        // Set new timer
+        sleepTimerActive = true
+        sleepTimerRemaining = minutes * 60 // Convert to seconds
+        sleepTimerEndDate = Date().addingTimeInterval(sleepTimerRemaining)
+        
+        // Create repeating timer to update remaining time
+        sleepTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self = self else { return }
+            
+            if let endDate = self.sleepTimerEndDate {
+                let remaining = endDate.timeIntervalSinceNow
+                
+                if remaining <= 0 {
+                    // Timer complete, stop playback
+                    self.pause()
+                    self.cancelSleepTimer()
+                } else {
+                    // Update remaining time
+                    self.sleepTimerRemaining = remaining
+                }
+            }
+        }
+    }
+        
+        // Cancel active timer
+    func cancelSleepTimer() {
+        sleepTimer?.invalidate()
+        sleepTimer = nil
+        sleepTimerEndDate = nil
+        sleepTimerActive = false
+        sleepTimerRemaining = 0
+    }
+        
+        // Format remaining time as string
+    func formattedRemainingTime() -> String {
+        let minutes = Int(sleepTimerRemaining) / 60
+        let seconds = Int(sleepTimerRemaining) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
     
     @MainActor
     func fetchSongs() async {

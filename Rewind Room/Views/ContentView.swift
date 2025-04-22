@@ -17,6 +17,8 @@ struct ContentView: View {
     
     @State private var recordIsSpinning = false
     @State private var showingInfo = false
+    @State private var showingSleepTimer = false
+    
     @State var currItem: Int = 0
     
     
@@ -248,9 +250,32 @@ struct ContentView: View {
                             .foregroundColor(.white)
                     }
                 }
+                
+                //Sleep Timer
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showingSleepTimer.toggle()
+                    }) {
+                        ZStack {
+                            Image(systemName: "clock")
+                                .foregroundColor(oldiesMusicViewModel.sleepTimerActive ? .blue : .white)
+                            
+                            if oldiesMusicViewModel.sleepTimerActive {
+                                // Show small indicator dot when timer is active
+                                Circle()
+                                    .fill(Color.red)
+                                    .frame(width: 8, height: 8)
+                                    .offset(x: 7, y: -7)
+                            }
+                        }
+                    }
+                }
             }
             .sheet(isPresented: $showingInfo) {
                 infoView()
+            }
+            .sheet(isPresented: $showingSleepTimer) {
+                SleepTimerView(viewModel: oldiesMusicViewModel, isPresented: $showingSleepTimer)
             }
             .task {
                 await oldiesMusicViewModel.fetchSongs()
