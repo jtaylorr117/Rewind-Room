@@ -40,15 +40,7 @@ struct ContentView: View {
                         value: recordIsSpinning
                     )
                     
-                    
-                    //                    Text(audioPlayerViewModel.songsArray[currItem].title)
-                    //                        .font(.title3)
                 }
-                
-                
-                
-                //Text("\(audioPlayerViewModel.songsArray.last?.id ?? UUID())")
-                
                 
                 VStack{
                     
@@ -80,6 +72,7 @@ struct ContentView: View {
                 
                 await rainSoundsViewModel.fetchSoundEffects()
                 rainSoundsViewModel.setSoundEffect(soundEffectId: 1)
+                rainSoundsViewModel.setVolumeLevel(volume: 0.5)
                 
                 await staticSoundsViewModel.fetchSoundEffects()
                 staticSoundsViewModel.setSoundEffect(soundEffectId: 2) // Static
@@ -87,8 +80,7 @@ struct ContentView: View {
                 
                 await fireSoundsViewModel.fetchSoundEffects()
                 fireSoundsViewModel.setSoundEffect(soundEffectId: 3) // Fire
-                oldiesMusicViewModel.setVolumeLevel(volume: 0.5)
-                
+                fireSoundsViewModel.setVolumeLevel(volume: 0.5)
             }
         }
     }

@@ -17,6 +17,16 @@ class AudioPlayerViewModel: ObservableObject {
     @Published var soundEffectArray: [SoundEffect] = []
     @Published var songVolumeLevel: Float = 50.0
     
+    @Published var shouldLoop: Bool = true
+    private var playbackObserver: Any?
+
+    //deallocates the observeer when the viewmodel is no longer needed
+    deinit {
+        if let observer = playbackObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+    
     func play() {
         guard let player = audioPlayer else { return }
         player.play()
@@ -39,6 +49,7 @@ class AudioPlayerViewModel: ObservableObject {
     func setCurrentSong(song: Song){
         let url = URL(string: song.audio_url)!
         audioPlayer = AVPlayer(url: url)
+        observePlayerDidFinishPlaying()
     }
     
     
@@ -50,6 +61,7 @@ class AudioPlayerViewModel: ObservableObject {
                 let foundSound = sound
                 let url = URL(string: foundSound.audioFile)!
                 audioPlayer = AVPlayer(url: url)
+                observePlayerDidFinishPlaying()
                 break
             }
         }
@@ -58,7 +70,31 @@ class AudioPlayerViewModel: ObservableObject {
     func setVolumeLevel(volume: Float){
         guard let player = audioPlayer else { return }
         player.volume = volume
+        songVolumeLevel = volume
     }
+    
+    // useses an observer to check when a song finishes playing so that it can loop it
+    private func observePlayerDidFinishPlaying() {
+        if let observer = playbackObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+
+        playbackObserver = NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: audioPlayer?.currentItem,
+            queue: .main
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            if self.shouldLoop {
+                self.audioPlayer?.seek(to: .zero)
+                self.audioPlayer?.play()
+            } else {
+                self.isPlaying = false
+            }
+        }
+    }
+
+    
     
     @MainActor
     func fetchSongs() async {
@@ -94,5 +130,6 @@ class AudioPlayerViewModel: ObservableObject {
             print ("ERROR:: \(error)")
         }
     }
+    
     
 }
