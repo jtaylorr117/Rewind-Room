@@ -286,6 +286,7 @@ struct ContentView: View {
             }
             .task {
                 await oldiesMusicViewModel.fetchSongs()
+                currItem = Int.random(in: 0..<oldiesMusicViewModel.songsArray.count)
                 oldiesMusicViewModel.setCurrentSong(song: oldiesMusicViewModel.songsArray[currItem])
                 oldiesMusicViewModel.setVolumeLevel(volume: 0)
                 
