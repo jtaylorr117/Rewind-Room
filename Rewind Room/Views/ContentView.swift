@@ -17,7 +17,7 @@ struct ContentView: View {
     
     
     
-    @State private var recordIsSpinning = false
+    
     @State private var showingInfo = false
     @State private var showingSleepTimer = false
     
@@ -33,7 +33,7 @@ struct ContentView: View {
     
     
     //sleep timer options
-    @State var timerOptions = [0.1, 0.5, 1, 5, 10, 15, 30, 60]
+    @State var timerOptions = [0.5, 1, 5, 10, 15, 20, 30, 60]
     
     
     var body: some View {
@@ -61,11 +61,11 @@ struct ContentView: View {
                                 }
                                 .frame(width: 250, height: 250)
                                 .clipShape(Circle())
-                                .rotationEffect(Angle.degrees(recordIsSpinning ? 360 : 0))
-                                .animation(recordIsSpinning
+                                .rotationEffect(Angle.degrees(oldiesMusicViewModel.recordIsSpinning ? 360 : 0))
+                                .animation(oldiesMusicViewModel.recordIsSpinning
                                            ? Animation.linear(duration: 4.0).repeatForever(autoreverses: false)
                                            : .default,
-                                           value: recordIsSpinning
+                                           value: oldiesMusicViewModel.recordIsSpinning
                                 )
                                 
                             }
@@ -93,7 +93,7 @@ struct ContentView: View {
                     VStack(spacing: 12) {
                         OldiesSliderView(
                             viewModel: oldiesMusicViewModel,
-                            isSpinning: $recordIsSpinning,
+                            isSpinning: $oldiesMusicViewModel.recordIsSpinning,
                             currItem: $currItem
                         )
                         .background(oldiesMusicViewModel.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
@@ -323,10 +323,10 @@ struct ContentView: View {
         
         if oldiesVolume > 0 && !oldiesMusicViewModel.isPlaying {
             oldiesMusicViewModel.play()
-            recordIsSpinning = true
+            oldiesMusicViewModel.recordIsSpinning = true
         } else if oldiesVolume == 0 && oldiesMusicViewModel.isPlaying {
             oldiesMusicViewModel.pause()
-            recordIsSpinning = false
+            oldiesMusicViewModel.recordIsSpinning = false
         }
         
         if rainVolume > 0 && !rainSoundsViewModel.isPlaying {
@@ -382,7 +382,19 @@ struct ContentView: View {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 15) {
                         ForEach(timerOptions, id: \.self) { minutes in
                             Button(action: {
-                                oldiesMusicViewModel.startSleepTimer(minutes: Double(minutes))
+                                if(oldiesMusicViewModel.isPlaying){
+                                    oldiesMusicViewModel.startSleepTimer(minutes: Double(minutes))
+                                }
+                                if(staticSoundsViewModel.isPlaying){
+                                    staticSoundsViewModel.startSleepTimer(minutes: Double(minutes))
+                                }
+                                if(fireSoundsViewModel.isPlaying){
+                                    fireSoundsViewModel.startSleepTimer(minutes: Double(minutes))
+                                }
+                                if(rainSoundsViewModel.isPlaying){
+                                    rainSoundsViewModel.startSleepTimer(minutes: Double(minutes))
+                                }
+                                
                             }) {
                                 VStack {
                                     if(minutes < 1){

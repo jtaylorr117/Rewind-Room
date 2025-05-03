@@ -16,6 +16,8 @@ class AudioPlayerViewModel: ObservableObject {
     @Published var songsArray: [Song] = []
     @Published var soundEffectArray: [SoundEffect] = []
     @Published var songVolumeLevel: Float = 50.0
+    @Published var recordIsSpinning = false
+    
     
     @Published var shouldLoop: Bool = true
     private var playbackObserver: Any?
@@ -120,6 +122,8 @@ class AudioPlayerViewModel: ObservableObject {
                 if remaining <= 0 {
                     // Timer complete, stop playback
                     self.pause()
+                    self.setVolumeLevel(volume: 0)
+                    self.recordIsSpinning = false
                     self.cancelSleepTimer()
                 } else {
                     // Update remaining time
