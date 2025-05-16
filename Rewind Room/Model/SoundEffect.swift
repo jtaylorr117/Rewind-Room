@@ -7,7 +7,10 @@
 
 struct SoundEffect: Decodable{
     let id: Int
-    let name: String
-    let audioFile: String
+    let fileName: String
     let soundType: String
+    let label: String
+    let icon: String
+    let audioFile: String
+    let isPremiumSound: Bool
 }

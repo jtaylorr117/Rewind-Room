@@ -10,9 +10,9 @@ import MediaPlayer
 
 struct ContentView: View {
     @StateObject var oldiesMusicViewModel = AudioPlayerViewModel()
-    @StateObject var rainSoundsViewModel = AudioPlayerViewModel()
-    @StateObject var staticSoundsViewModel = AudioPlayerViewModel()
-    @StateObject var fireSoundsViewModel = AudioPlayerViewModel()
+    @StateObject var sliderViewModel1 = AudioPlayerViewModel()
+    @StateObject var sliderViewModel2 = AudioPlayerViewModel()
+    @StateObject var sliderViewModel3 = AudioPlayerViewModel()
     
     
     
@@ -41,7 +41,7 @@ struct ContentView: View {
             ZStack{
             
                 VStack{
-                    
+                    // Image
                     VStack{
                         if !oldiesMusicViewModel.songsArray.isEmpty{
                             ZStack{
@@ -73,7 +73,7 @@ struct ContentView: View {
                             VStack(spacing: 5) {
                                 Text(oldiesMusicViewModel.songsArray[currItem].title)
                                     .font(.headline)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                 
                                 if let date = oldiesMusicViewModel.songsArray[currItem].date {
                                     Text(date)
@@ -89,40 +89,45 @@ struct ContentView: View {
                                 .padding()
                         }
                     }
-                    //box of sound effects
+                    // Box of sound effects
                     VStack(spacing: 12) {
-                        OldiesSliderView(
-                            viewModel: oldiesMusicViewModel,
-                            isSpinning: $oldiesMusicViewModel.recordIsSpinning,
-                            currItem: $currItem
-                        )
-                        .background(oldiesMusicViewModel.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
-                        .cornerRadius(10)
+                        Button {
+                            print("Button")
+                        } label: {
+                            OldiesSliderView(
+                                viewModel: oldiesMusicViewModel,
+                                isSpinning: $oldiesMusicViewModel.recordIsSpinning,
+                                currItem: $currItem
+                            )
+                            .background(oldiesMusicViewModel.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
+                            .cornerRadius(10)
+                        }
+
                         
-                        SoundEffectSliderView(
-                            viewModel: rainSoundsViewModel,
-                            symbol: "arrow.clockwise",
-                            label: "Rain"
-                        )
-                        .background(rainSoundsViewModel.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
-                        .cornerRadius(10)
                         
-                        SoundEffectSliderView(
-                            viewModel: staticSoundsViewModel,
-                            symbol: "arrow.clockwise",
-                            label: "Static"
-                        )
-                        .background(staticSoundsViewModel.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
-                        .cornerRadius(10)
+                        NavigationLink{
+                            SoundEffectDetailView(soundEffectViewModel: sliderViewModel1)
+                        }label:{
+                            SoundEffectSliderView(viewModel: sliderViewModel1)
+                            .background(sliderViewModel1.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
+                            .cornerRadius(10)
+                        }
                         
-                        SoundEffectSliderView(
-                            viewModel: fireSoundsViewModel,
-                            symbol: "arrow.clockwise",
-                            label: "Fire"
-                        )
-                        .background(fireSoundsViewModel.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
-                        .cornerRadius(10)
+                        NavigationLink{
+                            SoundEffectDetailView(soundEffectViewModel: sliderViewModel2)
+                        }label:{
+                            SoundEffectSliderView(viewModel: sliderViewModel2)
+                            .background(sliderViewModel2.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
+                            .cornerRadius(10)
+                        }
                         
+                        NavigationLink{
+                            SoundEffectDetailView(soundEffectViewModel: sliderViewModel3)
+                        }label:{
+                            SoundEffectSliderView(viewModel: sliderViewModel3)
+                            .background(sliderViewModel3.isPlaying ? Color.accentColor.opacity(0.2) : Color.clear)
+                            .cornerRadius(10)
+                        }
                         
                         
                         // Preset buttons
@@ -286,21 +291,28 @@ struct ContentView: View {
             }
             .task {
                 await oldiesMusicViewModel.fetchSongs()
-                currItem = Int.random(in: 0..<oldiesMusicViewModel.songsArray.count)
-                oldiesMusicViewModel.setCurrentSong(song: oldiesMusicViewModel.songsArray[currItem])
-                oldiesMusicViewModel.setVolumeLevel(volume: 0)
+                if(oldiesMusicViewModel.getCurrentSong().title == ""){
+                    currItem = Int.random(in: 0..<oldiesMusicViewModel.songsArray.count)
+                    oldiesMusicViewModel.setCurrentSong(song: oldiesMusicViewModel.songsArray[currItem])
+                    oldiesMusicViewModel.setVolumeLevel(volume: 0)
+                }
+                await sliderViewModel1.fetchSoundEffects()
+                if(sliderViewModel1.getSoundEffect().fileName == ""){
+                    sliderViewModel1.setSoundEffect(soundEffectId: 1)
+                    sliderViewModel1.setVolumeLevel(volume: 0)
+                }
+                await sliderViewModel2.fetchSoundEffects()
+                if(sliderViewModel2.getSoundEffect().fileName == ""){
+                    sliderViewModel2.setSoundEffect(soundEffectId: 2) // Static
+                    sliderViewModel2.setVolumeLevel(volume: 0)
+                }
+                await sliderViewModel3.fetchSoundEffects()
+                if(sliderViewModel3.getSoundEffect().fileName == ""){
+                    sliderViewModel3.setSoundEffect(soundEffectId: 3) // Fire
+                    sliderViewModel3.setVolumeLevel(volume: 0)
+                }
                 
-                await rainSoundsViewModel.fetchSoundEffects()
-                rainSoundsViewModel.setSoundEffect(soundEffectId: 1)
-                rainSoundsViewModel.setVolumeLevel(volume: 0)
                 
-                await staticSoundsViewModel.fetchSoundEffects()
-                staticSoundsViewModel.setSoundEffect(soundEffectId: 2) // Static
-                staticSoundsViewModel.setVolumeLevel(volume: 0)
-                
-                await fireSoundsViewModel.fetchSoundEffects()
-                fireSoundsViewModel.setSoundEffect(soundEffectId: 3) // Fire
-                fireSoundsViewModel.setVolumeLevel(volume: 0)
             }
         }
     }
@@ -318,9 +330,9 @@ struct ContentView: View {
     // Helper function to activate presets
     private func activatePreset(oldiesVolume: Float, rainVolume: Float, staticVolume: Float, fireVolume: Float) {
         oldiesMusicViewModel.setVolumeLevel(volume: oldiesVolume)
-        rainSoundsViewModel.setVolumeLevel(volume: rainVolume)
-        staticSoundsViewModel.setVolumeLevel(volume: staticVolume)
-        fireSoundsViewModel.setVolumeLevel(volume: fireVolume)
+        sliderViewModel1.setVolumeLevel(volume: rainVolume)
+        sliderViewModel2.setVolumeLevel(volume: staticVolume)
+        sliderViewModel3.setVolumeLevel(volume: fireVolume)
         
         if oldiesVolume > 0 && !oldiesMusicViewModel.isPlaying {
             oldiesMusicViewModel.play()
@@ -330,29 +342,29 @@ struct ContentView: View {
             oldiesMusicViewModel.recordIsSpinning = false
         }
         
-        if rainVolume > 0 && !rainSoundsViewModel.isPlaying {
-            rainSoundsViewModel.play()
-        } else if rainVolume == 0 && rainSoundsViewModel.isPlaying {
-            rainSoundsViewModel.pause()
+        if rainVolume > 0 && !sliderViewModel1.isPlaying {
+            sliderViewModel1.play()
+        } else if rainVolume == 0 && sliderViewModel1.isPlaying {
+            sliderViewModel1.pause()
         }
         
-        if staticVolume > 0 && !staticSoundsViewModel.isPlaying {
-            staticSoundsViewModel.play()
-        } else if staticVolume == 0 && staticSoundsViewModel.isPlaying {
-            staticSoundsViewModel.pause()
+        if staticVolume > 0 && !sliderViewModel2.isPlaying {
+            sliderViewModel2.play()
+        } else if staticVolume == 0 && sliderViewModel2.isPlaying {
+            sliderViewModel2.pause()
         }
         
-        if fireVolume > 0 && !fireSoundsViewModel.isPlaying {
-            fireSoundsViewModel.play()
-        } else if fireVolume == 0 && fireSoundsViewModel.isPlaying {
-            fireSoundsViewModel.pause()
+        if fireVolume > 0 && !sliderViewModel3.isPlaying {
+            sliderViewModel3.play()
+        } else if fireVolume == 0 && sliderViewModel3.isPlaying {
+            sliderViewModel3.pause()
         }
     }
     
     private func sleepTimerView() -> some View {
         NavigationView {
             VStack(spacing: 20) {
-                if oldiesMusicViewModel.sleepTimerActive || rainSoundsViewModel.sleepTimerActive{
+                if oldiesMusicViewModel.sleepTimerActive || sliderViewModel1.sleepTimerActive{
                     // Active timer display
                     VStack(spacing: 15) {
                         Text("Sleep timer active")
@@ -386,14 +398,14 @@ struct ContentView: View {
                                 if(oldiesMusicViewModel.isPlaying){
                                     oldiesMusicViewModel.startSleepTimer(minutes: Double(minutes))
                                 }
-                                if(staticSoundsViewModel.isPlaying){
-                                    staticSoundsViewModel.startSleepTimer(minutes: Double(minutes))
+                                if(sliderViewModel2.isPlaying){
+                                    sliderViewModel2.startSleepTimer(minutes: Double(minutes))
                                 }
-                                if(fireSoundsViewModel.isPlaying){
-                                    fireSoundsViewModel.startSleepTimer(minutes: Double(minutes))
+                                if(sliderViewModel3.isPlaying){
+                                    sliderViewModel3.startSleepTimer(minutes: Double(minutes))
                                 }
-                                if(rainSoundsViewModel.isPlaying){
-                                    rainSoundsViewModel.startSleepTimer(minutes: Double(minutes))
+                                if(sliderViewModel1.isPlaying){
+                                    sliderViewModel1.startSleepTimer(minutes: Double(minutes))
                                 }
                                 
                             }) {

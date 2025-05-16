@@ -13,14 +13,16 @@ class AudioPlayerViewModel: ObservableObject {
     
     
     @Published var isPlaying = false
+    //Oldies
     @Published var songsArray: [Song] = []
+    //Sound Effects
     @Published var soundEffectArray: [SoundEffect] = []
     @Published var songVolumeLevel: Float = 50.0
     @Published var recordIsSpinning = false
-    
-    
+    //Songs looping when finished
     @Published var shouldLoop: Bool = true
     private var playbackObserver: Any?
+    
     
     // Timer properties
     @Published var sleepTimerActive: Bool = false
@@ -28,6 +30,13 @@ class AudioPlayerViewModel: ObservableObject {
     private var sleepTimer: Timer?
     private var sleepTimerEndDate: Date?
 
+    
+    //Current Items
+    private var currentSoundEffect: SoundEffect = SoundEffect(id: 0, fileName: "", soundType: "", label: "", icon: "", audioFile: "", isPremiumSound: false)
+    private var currentOldie: Song = Song(id: UUID(), title: "", date: "", public_domain: true, source_url: "", audio_url: "", art_url: "")
+    
+    
+    
     //deallocates the observeer when the viewmodel is no longer needed
     deinit {
         if let observer = playbackObserver {
@@ -57,9 +66,13 @@ class AudioPlayerViewModel: ObservableObject {
     func setCurrentSong(song: Song){
         let url = URL(string: song.audio_url)!
         audioPlayer = AVPlayer(url: url)
+        currentOldie = song
         observePlayerDidFinishPlaying()
     }
     
+    func getCurrentSong() -> Song{
+        return currentOldie
+    }
     
     // sets the sound effect to the one in the database matching the id provided
     func setSoundEffect(soundEffectId: Int){
@@ -67,12 +80,19 @@ class AudioPlayerViewModel: ObservableObject {
         for sound in soundEffectArray{
             if (sound.id == soundEffectId){
                 let foundSound = sound
+                
+                //set current variables
+                currentSoundEffect = foundSound
                 let url = URL(string: foundSound.audioFile)!
                 audioPlayer = AVPlayer(url: url)
                 observePlayerDidFinishPlaying()
                 break
             }
         }
+    }
+    
+    func getSoundEffect() -> SoundEffect{
+        return currentSoundEffect
     }
     
     func setVolumeLevel(volume: Float){
@@ -175,7 +195,6 @@ class AudioPlayerViewModel: ObservableObject {
                 .select()
                 .execute()
                 .value
-            
             soundEffectArray = soundEffects
             
         }
