@@ -298,7 +298,7 @@ struct ContentView: View {
                 }
                 await sliderViewModel1.fetchSoundEffects()
                 if(sliderViewModel1.getSoundEffect().fileName == ""){
-                    sliderViewModel1.setSoundEffect(soundEffectId: 1)
+                    sliderViewModel1.setSoundEffect(soundEffectId: 1)// Rain
                     sliderViewModel1.setVolumeLevel(volume: 0)
                 }
                 await sliderViewModel2.fetchSoundEffects()
