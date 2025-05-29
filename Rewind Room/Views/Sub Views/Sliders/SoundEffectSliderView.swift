@@ -61,6 +61,10 @@ struct SoundEffectSliderView: View {
                 }
             }
             .padding(.top, 12)
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14))
+                .foregroundColor(.gray)
 
             // Restart Button
 //            Button {
