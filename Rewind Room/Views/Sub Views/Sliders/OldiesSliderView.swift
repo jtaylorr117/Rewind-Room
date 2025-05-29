@@ -47,7 +47,7 @@ struct OldiesSliderView: View {
                 
                 Spacer()
                 
-                Text("Oldies")
+                Text("oldies")
                     .font(.system(size: 14, weight: .medium))
                     .foregroundColor(.white)
             }
