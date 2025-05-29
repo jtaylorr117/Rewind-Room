@@ -31,8 +31,8 @@ struct InfoView: View {
                         Text("• Tap play/pause to control each sound individually")
                         Text("• Use the sliders to adjust volume levels")
                         //Text("• Try the preset buttons for quick atmosphere changes")
-                        Text("• Tap the forward button on the music player to change songs")
-                        Text("• Tap the restart button on ambient sounds to restart the loop, by default the sounds will auto-loop")
+                        Text("• Tap on the sound to get more info and change settings")
+                        Text("• Tap on the top left to activate the sleep timer for those long nights")
                     }
                     
                     if !viewModel.songsArray.isEmpty {

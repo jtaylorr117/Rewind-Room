@@ -91,8 +91,10 @@ struct ContentView: View {
                     }
                     // Box of sound effects
                     VStack(spacing: 12) {
-                        Button {
-                            print("Button")
+                        NavigationLink {
+                            OldiesDetailView(viewModel: oldiesMusicViewModel,
+                                             isSpinning: $oldiesMusicViewModel.recordIsSpinning,
+                                             currItem: $currItem)
                         } label: {
                             OldiesSliderView(
                                 viewModel: oldiesMusicViewModel,

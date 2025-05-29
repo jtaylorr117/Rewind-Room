@@ -58,38 +58,11 @@ struct OldiesSliderView: View {
                 viewModel.setVolumeLevel(volume: viewModel.songVolumeLevel)
             }
             .padding(.top, 12)
-
-            // Skip Button
-            Button {
-                if viewModel.isPlaying {
-                    viewModel.pause()
-                }
-
-                isSpinning = false
-
-                currItem = Int.random(in: 0..<viewModel.songsArray.count)
-                viewModel.setCurrentSong(song: viewModel.songsArray[currItem])
-                viewModel.setVolumeLevel(volume: viewModel.songVolumeLevel)
-                
-                if viewModel.songVolumeLevel > 0 {
-                    viewModel.play()
-                    isSpinning = false
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                        isSpinning = true
-                    }
-                }
-            } label: {
-                ZStack {
-                    Circle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 36, height: 36)
-                    
-                    Image(systemName: "forward.fill")
-                        .font(.system(size: 14))
-                        .foregroundColor(.white)
-                }
-            }
-            .buttonStyle(PlainButtonStyle())
+            
+            
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14))
+                .foregroundColor(.gray)
             
             
         }
